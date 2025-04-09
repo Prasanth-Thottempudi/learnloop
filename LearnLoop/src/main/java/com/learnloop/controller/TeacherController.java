@@ -27,7 +27,7 @@ public class TeacherController {
         
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/teacher-by-id/{id}")
     public ResponseEntity<TeacherResponse> getTeacherById(@PathVariable Integer id) {
     	TeacherResponse res=	teacherService.getTeacherById(id);
 

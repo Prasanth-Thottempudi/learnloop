@@ -12,6 +12,7 @@ import com.learnloop.entity.Address;
 import com.learnloop.entity.Education;
 import com.learnloop.entity.Experience;
 import com.learnloop.entity.Teacher;
+import com.learnloop.exceptions.ResourceNotFoundException;
 import com.learnloop.request.AddressRequest;
 import com.learnloop.request.EducationRequest;
 import com.learnloop.request.ExperienceRequest;
@@ -55,31 +56,40 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public TeacherResponse updateTeacher(Integer id, TeacherRegistrationRequest request) {
         Teacher existing = teacherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
 
-        // Clear previous experience and education entries
-        existing.getExperiences().clear();
-        existing.getEducations().clear();
-
-        // Update fields
         existing.setTeacherName(request.getTeacherName());
         existing.setTeacherDateOfBirth(request.getTeacherDateOfBirth());
         existing.setTeacherMobileNumber(request.getTeacherMobileNumber());
 
-        // Update address
-        Address address = mapToAddress(request.getAddress());
-        existing.setAddress(address);
+        if (request.getAddress() != null) {
+            Address address = existing.getAddress();
+            if (address == null) {
+                address = new Address();
+                existing.setAddress(address);
+            }
+            address.setStreet(request.getAddress().getStreet());
+            address.setCity(request.getAddress().getCity());
+            address.setState(request.getAddress().getState());
+            address.setCountry(request.getAddress().getCountry());
+            address.setPostalCode(request.getAddress().getZipCode());
+        }
 
-        // Re-map experiences and educations
-        List<Experience> experienceList = request.getExperiences().stream()
-                .map(exp -> mapToExperience(exp, existing))
-                .collect(Collectors.toList());
-        existing.setExperiences(experienceList);
+        if (request.getExperiences() != null && !request.getExperiences().isEmpty()) {
+            existing.getExperiences().clear();
+            List<Experience> experienceList = request.getExperiences().stream()
+                    .map(exp -> mapToExperience(exp, existing))
+                    .collect(Collectors.toList());
+            existing.getExperiences().addAll(experienceList);
+        }
 
-        List<Education> educationList = request.getEducations().stream()
-                .map(edu -> mapToEducation(edu, existing))
-                .collect(Collectors.toList());
-        existing.setEducations(educationList);
+        if (request.getEducations() != null && !request.getEducations().isEmpty()) {
+            existing.getEducations().clear();
+            List<Education> educationList = request.getEducations().stream()
+                    .map(edu -> mapToEducation(edu, existing))
+                    .collect(Collectors.toList());
+            existing.getEducations().addAll(educationList);
+        }
 
         Teacher updated = teacherRepository.save(existing);
         return mapToResponse(updated);

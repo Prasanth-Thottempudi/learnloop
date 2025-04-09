@@ -1,7 +1,12 @@
 package com.learnloop.exceptions;
 
 public class DuplicateStudentException extends RuntimeException {
-    public DuplicateStudentException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public DuplicateStudentException(String message) {
         super(message);
     }
 }

@@ -28,11 +28,7 @@ public class StudentsController {
 	@Autowired
 	private StudentService studentService;
 
-    @GetMapping("/demo")
-    public String demo() {
-        return "students demo";
-    }
-    
+ 
    
     @PostMapping("/register")
     public ResponseEntity<Students> registerStudent(@Valid @RequestBody StudentRegistrationRequest request) {

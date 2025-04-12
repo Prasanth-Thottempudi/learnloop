@@ -12,24 +12,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/subjects")
+@RequestMapping("/learn-api")
 public class SubjectsController {
 
     @Autowired
     private SubjectService subjectService;
 
-    @PostMapping("/register")
+    @PostMapping("/subjects/register")
     public ResponseEntity<SubjectResponse> registerSubject(@Valid @RequestBody SubjectRegistrationRequest request) {
         SubjectResponse subject = subjectService.registerSubject(request);
         return ResponseEntity.status(201).body(subject);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/subjects/{id}")
     public ResponseEntity<SubjectResponse> getSubjectById(@PathVariable Integer id) {
         return ResponseEntity.ok(subjectService.getSubjectById(id));
     }
 
-    @GetMapping("/get-all-subjects")
+    @GetMapping("/subjects/get-all-subjects")
     public ResponseEntity<List<SubjectResponse>> getAllSubjects() {
         return ResponseEntity.ok(subjectService.getAllSubjects());
     }
@@ -41,7 +41,7 @@ public class SubjectsController {
         return ResponseEntity.ok(subjectService.updateSubject(id, request));
     }
 
-    @DeleteMapping("/delete-by-id/{id}")
+    @DeleteMapping("/subjects/delete-by-id/{id}")
     public ResponseEntity<String> deleteSubject(@PathVariable Integer id) {
         subjectService.deleteSubject(id);
         return ResponseEntity.ok("Subject deleted successfully");

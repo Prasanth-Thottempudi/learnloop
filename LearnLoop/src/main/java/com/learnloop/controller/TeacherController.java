@@ -14,33 +14,34 @@ import com.learnloop.service.TeacherService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/teachers")
+@RequestMapping("/learn-api")
+@CrossOrigin(origins = "http://localhost:4200") 
 public class TeacherController {
 
     @Autowired
     private TeacherService teacherService;
 
-    @PostMapping("/register")
+    @PostMapping("/teachers/register")
     public ResponseEntity<TeacherResponse> registerTeacher(@Valid @RequestBody TeacherRegistrationRequest request) {
     	TeacherResponse res=	teacherService.registerTeacher(request);
     	return ResponseEntity.status(201).body(res);
         
     }
 
-    @GetMapping("/teacher-by-id/{id}")
+    @GetMapping("/teachers/teacher-by-id/{id}")
     public ResponseEntity<TeacherResponse> getTeacherById(@PathVariable Integer id) {
     	TeacherResponse res=	teacherService.getTeacherById(id);
 
         return ResponseEntity.status(201).body(res);
     }
 
-    @GetMapping("/get-all-teachers")
+    @GetMapping("/teachers/get-all-teachers")
     public ResponseEntity<List<TeacherResponse>> getAllTeachers() {
     	List<TeacherResponse> res=teacherService.getAllTeachers();
         return ResponseEntity.status(201).body(res);
     }
 
-    @PutMapping("/update-teacher/{id}")
+    @PutMapping("/teachers/update-teacher/{id}")
     public ResponseEntity<TeacherResponse> updateTeacher(
             @PathVariable Integer id,
             @Valid @RequestBody TeacherRegistrationRequest request) {
@@ -48,7 +49,7 @@ public class TeacherController {
         return ResponseEntity.status(201).body(res);
     }
 
-    @DeleteMapping("/delete-by-id/{id}")
+    @DeleteMapping("/teachers/delete-by-id/{id}")
     public ResponseEntity<String> deleteTeacher(@PathVariable Integer id) {
     	String res=teacherService.deleteTeacher(id);
         return ResponseEntity.status(201).body(res);

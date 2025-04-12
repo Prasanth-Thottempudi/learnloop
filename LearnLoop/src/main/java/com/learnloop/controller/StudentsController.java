@@ -22,7 +22,7 @@ import com.learnloop.service.StudentService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/learn-api")
 public class StudentsController {
 	
 	@Autowired
@@ -30,25 +30,25 @@ public class StudentsController {
 
  
    
-    @PostMapping("/register")
+    @PostMapping("/students/register")
     public ResponseEntity<Students> registerStudent(@Valid @RequestBody StudentRegistrationRequest request) {
         Students student = studentService.registerStudent(request);
         return new ResponseEntity<>(student, HttpStatus.CREATED);
     }
     
-    @GetMapping("/{id}")
+    @GetMapping("/students/{id}")
     public ResponseEntity<StudentResponse> getStudentById(@PathVariable Long id) {
     	StudentResponse student = studentService.getStudentById(id);
         return new ResponseEntity<>(student, HttpStatus.OK);
     }
     
-    @GetMapping("/get-all-students")
+    @GetMapping("/students/get-all-students")
     public ResponseEntity<List<StudentResponse>> getAllStudents() {
         List<StudentResponse> students = studentService.getAllStudents();
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
-    @PutMapping("/update-student/{id}")
+    @PutMapping("/students/update-student/{id}")
     public ResponseEntity<StudentResponse> updateStudent(
             @PathVariable Long id,
             @Valid @RequestBody StudentRegistrationRequest request) {
@@ -56,7 +56,7 @@ public class StudentsController {
         return new ResponseEntity<>(updatedStudent, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-by-id/{id}")
+    @DeleteMapping("/students/delete-by-id/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return new ResponseEntity<>("Student deleted successfully", HttpStatus.OK);

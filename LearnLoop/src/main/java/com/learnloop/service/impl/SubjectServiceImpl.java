@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.learnloop.dao.SubjectsRepository;
 import com.learnloop.entity.Subjects;
+import com.learnloop.exceptions.ResourceNotFoundException;
 import com.learnloop.request.SubjectRegistrationRequest;
 import com.learnloop.response.SubjectResponse;
 import com.learnloop.service.SubjectService;
@@ -30,7 +31,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public SubjectResponse getSubjectById(Integer id) {
         Subjects subject = subjectsRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
         return mapToResponse(subject);
     }
 

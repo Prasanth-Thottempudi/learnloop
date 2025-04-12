@@ -42,7 +42,7 @@ public class TeacherServiceImpl implements TeacherService {
     @Override
     public TeacherResponse getTeacherById(Integer id) {
         Teacher teacher = teacherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
         return mapToResponse(teacher);
     }
 
@@ -99,12 +99,11 @@ public class TeacherServiceImpl implements TeacherService {
     @Transactional
     public String deleteTeacher(Integer id) {
         Teacher teacher = teacherRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
         teacherRepository.delete(teacher);
         return "Teacher with ID " + id + " deleted successfully.";
     }
 
-    // ===== Helper methods =====
 
     private Teacher mapToEntity(TeacherRegistrationRequest request) {
         Teacher teacher = new Teacher();

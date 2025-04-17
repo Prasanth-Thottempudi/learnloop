@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.learnloop.entity.Students;
 import com.learnloop.request.StudentRegistrationRequest;
+import com.learnloop.response.Response;
 import com.learnloop.response.StudentResponse;
 import com.learnloop.service.StudentService;
 
@@ -31,8 +32,8 @@ public class StudentsController {
  
    
     @PostMapping("/students/register")
-    public ResponseEntity<Students> registerStudent(@Valid @RequestBody StudentRegistrationRequest request) {
-        Students student = studentService.registerStudent(request);
+    public ResponseEntity<StudentResponse> registerStudent(@Valid @RequestBody StudentRegistrationRequest request) {
+    	StudentResponse student = studentService.registerStudent(request);
         return new ResponseEntity<>(student, HttpStatus.CREATED);
     }
     
@@ -57,9 +58,9 @@ public class StudentsController {
     }
 
     @DeleteMapping("/students/delete-by-id/{id}")
-    public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
-        studentService.deleteStudent(id);
-        return new ResponseEntity<>("Student deleted successfully", HttpStatus.OK);
+    public ResponseEntity<Response> deleteStudent(@PathVariable Long id) {
+        Response res=studentService.deleteStudent(id);
+        return new ResponseEntity<>(res,HttpStatus.OK);
     }
     
 

@@ -1,17 +1,26 @@
 package com.learnloop.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.learnloop.dao.StudentRepository;
+import com.learnloop.dao.SubjectsRepository;
 import com.learnloop.entity.Address;
 import com.learnloop.entity.Students;
+import com.learnloop.entity.Subjects;
 import com.learnloop.exceptions.DuplicateStudentException;
 import com.learnloop.exceptions.ResourceNotFoundException;
 import com.learnloop.request.StudentRegistrationRequest;
+import com.learnloop.response.Response;
 import com.learnloop.response.StudentResponse;
+import com.learnloop.response.StudentResponse.SubjectResponse;
 import com.learnloop.service.StudentService;
 
 import jakarta.transaction.Transactional;
@@ -23,36 +32,90 @@ public class StudentServiceImpl implements StudentService {
 	@Autowired
 	private StudentRepository studentRepository;
 	
+	@Autowired
+	private SubjectsRepository subjectsRepository;
+	
 	
 
 	@Override
-    @Transactional(rollbackOn = Exception.class) 
-	public Students registerStudent(StudentRegistrationRequest request) {
-		if (studentRepository.existsByStudentAdharNumber(request.getStudentAdharNumber())) {
-			throw new DuplicateStudentException("A student with this Aadhar already exists.");
-		}
+	@Transactional(rollbackOn = Exception.class)
+	public StudentResponse registerStudent(StudentRegistrationRequest request) {
+	    if (studentRepository.existsByStudentAdharNumber(request.getStudentAdharNumber())) {
+	        throw new DuplicateStudentException("A student with this Aadhar already exists.");
+	    }
 
-		if (studentRepository.existsByMobileNumber(request.getStudentMobileNumber())) {
-			throw new DuplicateStudentException("A student with this mobile number already exists.");
-		}
+	    if (studentRepository.existsByMobileNumber(request.getStudentMobileNumber())) {
+	        throw new DuplicateStudentException("A student with this mobile number already exists.");
+	    }
 
-		Address address = new Address();
-		address.setStreet(request.getStreet());
-		address.setCity(request.getCity());
-		address.setState(request.getState());
-		address.setPostalCode(request.getPostalCode());
-		address.setCountry(request.getCountry());
-//		addressRepository.save(address);
+	    // Create Address
+	    Address address = new Address();
+	    address.setStreet(request.getStreet());
+	    address.setCity(request.getCity());
+	    address.setState(request.getState());
+	    address.setPostalCode(request.getPostalCode());
+	    address.setCountry(request.getCountry());
 
-		Students student = new Students();
-		student.setStudentName(request.getStudentName());
-		student.setStudentAdharNumber(request.getStudentAdharNumber());
-		student.setDateOfBirth(request.getStudentDateOfBirth());
-		student.setMobileNumber(request.getStudentMobileNumber());
-		student.setAddress(address);
-		return studentRepository.save(student);
+	    // Create Student
+	    Students student = new Students();
+	    student.setStudentName(request.getStudentName());
+	    student.setStudentAdharNumber(request.getStudentAdharNumber());
+	    student.setDateOfBirth(request.getStudentDateOfBirth());
+	    student.setMobileNumber(request.getStudentMobileNumber());
+	    student.setAddress(address);
+
+	    // Assign Subjects
+	    List<Subjects> subjects = subjectsRepository.findAllById(request.getSubjectIds());
+
+	    if (subjects.size() != request.getSubjectIds().size()) {
+	        throw new IllegalArgumentException("One or more subject IDs are invalid.");
+	    }
+
+	    List<Subjects> subjectsSet = new ArrayList<>(subjects);
+	    student.setSubjects(subjectsSet);
+
+	    // Save Student
+	    Students savedStudent = studentRepository.save(student);
+
+	    // Convert to StudentResponse
+	    return mapToStudentResponse(savedStudent);
 	}
 
+	
+	private StudentResponse mapToStudentResponse(Students student) {
+	    StudentResponse response = new StudentResponse();
+	    response.setStudentId(student.getId());
+	    response.setStudentName(student.getStudentName());
+	    response.setStudentAdharNumber(student.getStudentAdharNumber());
+	    response.setStudentDateOfBirth(student.getDateOfBirth());
+	    response.setStudentMobileNumber(student.getMobileNumber());
+
+	    Address address = student.getAddress();
+	    if (address != null) {
+	        response.setStreet(address.getStreet());
+	        response.setCity(address.getCity());
+	        response.setState(address.getState());
+	        response.setPostalCode(address.getPostalCode());
+	        response.setCountry(address.getCountry());
+	    }
+
+	    List<StudentResponse.SubjectResponse> subjectResponses = student.getSubjects()
+	        .stream()
+	        .map(subject -> {
+	            StudentResponse.SubjectResponse subjectResponse = new StudentResponse.SubjectResponse();
+	            subjectResponse.setSubjectId(subject.getSubId());
+	            subjectResponse.setSubjectName(subject.getSubName());
+	            subjectResponse.setSubjectCredits(subject.getSubCredits());
+	            subjectResponse.setSubjectCode(subject.getSubCode());
+	            return subjectResponse;
+	        })
+	        .toList();
+
+	    response.setSubjects(subjectResponses);
+	    return response;
+	}
+
+	
 	@Override
     public StudentResponse getStudentById(Long id) {
 		StudentResponse res=new StudentResponse();
@@ -71,28 +134,49 @@ public class StudentServiceImpl implements StudentService {
         return res;
     }
 
+
 	@Override
 	public List<StudentResponse> getAllStudents() {
 	    List<Students> students = studentRepository.findAll();
+	    List<StudentResponse> response = new ArrayList<>();
 
-	    return students.stream().map(student -> {
-	        StudentResponse response = new StudentResponse();
-	        response.setStudentId(student.getId());
-	        response.setStudentName(student.getStudentName());
-	        response.setStudentAdharNumber(student.getStudentAdharNumber());
-	        response.setStudentDateOfBirth(student.getDateOfBirth());
-	        response.setStudentMobileNumber(student.getMobileNumber());
+	    for (Students subj : students) {
+	        StudentResponse stuRes = new StudentResponse();
+	        stuRes.setStudentId(subj.getId());
+	        stuRes.setStudentName(subj.getStudentName());
+	        stuRes.setStudentAdharNumber(subj.getStudentAdharNumber());
+	        stuRes.setStudentDateOfBirth(subj.getDateOfBirth());
+	        stuRes.setStudentMobileNumber(subj.getMobileNumber());
 
-	        if (student.getAddress() != null) {
-	            response.setStreet(student.getAddress().getStreet());
-	            response.setCity(student.getAddress().getCity());
-	            response.setState(student.getAddress().getState());
-	            response.setPostalCode(student.getAddress().getPostalCode());
-	            response.setCountry(student.getAddress().getCountry());
+	        // Map Address
+	        if (subj.getAddress() != null) {
+	            stuRes.setStreet(subj.getAddress().getStreet());
+	            stuRes.setCity(subj.getAddress().getCity());
+	            stuRes.setState(subj.getAddress().getState());
+	            stuRes.setPostalCode(subj.getAddress().getPostalCode());
+	            stuRes.setCountry(subj.getAddress().getCountry());
 	        }
 
-	        return response;
-	    }).toList();
+	        List<SubjectResponse> subjectResponses = new ArrayList<>();
+	        if (subj.getSubjects() != null) {
+	            List<Subjects> subjectsCopy = new ArrayList<>(subj.getSubjects());
+	            for (Subjects subject : subjectsCopy) {
+	                if (subject != null) {
+	                    SubjectResponse subjectResponse = new SubjectResponse();
+	                    subjectResponse.setSubjectId(subject.getSubId());
+	                    subjectResponse.setSubjectName(subject.getSubName());
+	                    subjectResponse.setSubjectCredits(subject.getSubCredits());
+	                    subjectResponse.setSubjectCode(subject.getSubCode());
+	                    subjectResponses.add(subjectResponse);
+	                }
+	            }
+	        }
+
+	        stuRes.setSubjects(subjectResponses);
+	        response.add(stuRes);
+	    }
+
+	    return response;
 	}
 
 
@@ -150,11 +234,17 @@ public class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
-	public void deleteStudent(Long id) {
+	public Response deleteStudent(Long id) {
 	    Students student = studentRepository.findById(id)
 	        .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + id));
 	    
 	    studentRepository.delete(student);
+	    Response response = new Response();
+        response.setResponseMessage("Subject with ID " + id + " deleted successfully.");
+        response.setResponseStatus("Success");
+        response.setId(student.getId());
+
+        return response;
 	}
 
 

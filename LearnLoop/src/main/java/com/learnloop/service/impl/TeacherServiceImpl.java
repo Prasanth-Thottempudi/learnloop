@@ -20,6 +20,7 @@ import com.learnloop.request.TeacherRegistrationRequest;
 import com.learnloop.response.AddressResponse;
 import com.learnloop.response.EducationResponse;
 import com.learnloop.response.ExperienceResponse;
+import com.learnloop.response.Response;
 import com.learnloop.response.TeacherResponse;
 import com.learnloop.service.TeacherService;
 
@@ -97,12 +98,21 @@ public class TeacherServiceImpl implements TeacherService {
 
     @Override
     @Transactional
-    public String deleteTeacher(Integer id) {
+    public Response deleteTeacher(Integer id) {
         Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
+
         teacherRepository.delete(teacher);
-        return "Teacher with ID " + id + " deleted successfully.";
+
+        // Create a response object with the necessary details
+        Response response = new Response();
+        response.setResponseMessage("Teacher with ID " + id + " deleted successfully.");
+        response.setResponseStatus("Success");
+        response.setId(id);
+
+        return response;
     }
+
 
 
     private Teacher mapToEntity(TeacherRegistrationRequest request) {

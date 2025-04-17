@@ -1,6 +1,8 @@
 package com.learnloop.entity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -62,5 +64,5 @@ public class Students {
         joinColumns = @JoinColumn(name = "student_id"),
         inverseJoinColumns = @JoinColumn(name = "subject_id")
     )
-    private Set<Subjects> subjects = new HashSet<>();
+    private List<Subjects> subjects = new ArrayList<>();
 }

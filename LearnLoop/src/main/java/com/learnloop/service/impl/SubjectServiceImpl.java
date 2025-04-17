@@ -10,8 +10,11 @@ import com.learnloop.dao.SubjectsRepository;
 import com.learnloop.entity.Subjects;
 import com.learnloop.exceptions.ResourceNotFoundException;
 import com.learnloop.request.SubjectRegistrationRequest;
+import com.learnloop.response.Response;
 import com.learnloop.response.SubjectResponse;
 import com.learnloop.service.SubjectService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class SubjectServiceImpl implements SubjectService {
@@ -53,9 +56,21 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public void deleteSubject(Integer id) {
-        subjectsRepository.deleteById(id);
+    @Transactional
+    public Response deleteSubject(Integer id) {
+        Subjects subject = subjectsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Subject not found with ID: " + id));
+
+        subjectsRepository.delete(subject);
+
+        Response response = new Response();
+        response.setResponseMessage("Subject with ID " + id + " deleted successfully.");
+        response.setResponseStatus("Success");
+        response.setId(id);
+
+        return response;
     }
+
 
     private SubjectResponse mapToResponse(Subjects subject) {
         SubjectResponse response = new SubjectResponse();

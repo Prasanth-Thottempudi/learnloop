@@ -1,6 +1,7 @@
 package com.learnloop.controller;
 
 import com.learnloop.request.SubjectRegistrationRequest;
+import com.learnloop.response.Response;
 import com.learnloop.response.SubjectResponse;
 import com.learnloop.service.SubjectService;
 
@@ -34,7 +35,7 @@ public class SubjectsController {
         return ResponseEntity.ok(subjectService.getAllSubjects());
     }
 
-    @PutMapping("/update-subject/{id}")
+    @PutMapping("/subjects/update-subject/{id}")
     public ResponseEntity<SubjectResponse> updateSubject(
             @PathVariable Integer id,
             @Valid @RequestBody SubjectRegistrationRequest request) {
@@ -42,8 +43,8 @@ public class SubjectsController {
     }
 
     @DeleteMapping("/subjects/delete-by-id/{id}")
-    public ResponseEntity<String> deleteSubject(@PathVariable Integer id) {
-        subjectService.deleteSubject(id);
-        return ResponseEntity.ok("Subject deleted successfully");
+    public ResponseEntity<Response> deleteSubject(@PathVariable Integer id) {
+    	Response res=    subjectService.deleteSubject(id);
+        return ResponseEntity.ok(res);
     }
 }

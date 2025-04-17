@@ -1,10 +1,10 @@
 package com.learnloop.response;
 
-import lombok.Data;
+import java.util.List;
 
+import lombok.Data;
 @Data
 public class StudentResponse {
-	
 	private Integer studentId;
 	private String studentName;
 	private String studentMobileNumber;
@@ -15,4 +15,14 @@ public class StudentResponse {
     private String state;
     private String postalCode;
     private String country;
+
+    private List<SubjectResponse> subjects;
+
+    @Data
+    public static class SubjectResponse {
+        private Integer subjectId;
+        private String subjectName;
+        private Integer subjectCredits;
+        private String subjectCode;
+    }
 }

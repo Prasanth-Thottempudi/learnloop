@@ -1,6 +1,7 @@
 package com.learnloop.service;
 
 import com.learnloop.request.SubjectRegistrationRequest;
+import com.learnloop.response.Response;
 import com.learnloop.response.SubjectResponse;
 
 import java.util.List;
@@ -10,5 +11,5 @@ public interface SubjectService {
     SubjectResponse getSubjectById(Integer id);
     List<SubjectResponse> getAllSubjects();
     SubjectResponse updateSubject(Integer id, SubjectRegistrationRequest request);
-    void deleteSubject(Integer id);
+    Response deleteSubject(Integer id);
 }

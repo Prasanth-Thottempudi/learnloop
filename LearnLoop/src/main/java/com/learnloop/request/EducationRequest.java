@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 public class EducationRequest {
 
-    private Integer educationId;
 
     @NotBlank(message = "Degree name is required")
     @Size(max = 100)

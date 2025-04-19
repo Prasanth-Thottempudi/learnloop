@@ -1,16 +1,21 @@
 package com.learnloop.service.impl;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.learnloop.dao.SubjectsRepository;
 import com.learnloop.dao.TeacherRepository;
 import com.learnloop.entity.Address;
 import com.learnloop.entity.Education;
 import com.learnloop.entity.Experience;
+import com.learnloop.entity.Subjects;
 import com.learnloop.entity.Teacher;
 import com.learnloop.exceptions.ResourceNotFoundException;
 import com.learnloop.request.AddressRequest;
@@ -21,6 +26,7 @@ import com.learnloop.response.AddressResponse;
 import com.learnloop.response.EducationResponse;
 import com.learnloop.response.ExperienceResponse;
 import com.learnloop.response.Response;
+import com.learnloop.response.SubjectResponse;
 import com.learnloop.response.TeacherResponse;
 import com.learnloop.service.TeacherService;
 
@@ -32,6 +38,8 @@ public class TeacherServiceImpl implements TeacherService {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    @Autowired
+    private SubjectsRepository subjectsRepository;
     @Override
     @Transactional
     public TeacherResponse registerTeacher(TeacherRegistrationRequest request) {
@@ -133,7 +141,9 @@ public class TeacherServiceImpl implements TeacherService {
                 .map(edu -> mapToEducation(edu, teacher))
                 .collect(Collectors.toList());
         teacher.setEducations(educations);
-
+        List<Subjects> subjects = new ArrayList<>(subjectsRepository.findAllById(request.getSubjectIds()));
+        teacher.setSubjects(subjects);
+        
         return teacher;
     }
 
@@ -178,20 +188,28 @@ public class TeacherServiceImpl implements TeacherService {
 
         response.setAddress(mapToAddressResponse(teacher.getAddress()));
 
-        response.setExperiences(
-            teacher.getExperiences().stream()
+        // Defensive copy of Hibernate PersistentSet
+        response.setExperiences(	
+            new ArrayList<>(teacher.getExperiences()).stream()
                 .map(this::mapToExperienceResponse)
                 .collect(Collectors.toList())
         );
 
         response.setEducations(
-            teacher.getEducations().stream()
+            new ArrayList<>(teacher.getEducations()).stream()
                 .map(this::mapToEducationResponse)
+                .collect(Collectors.toList())
+        );
+
+        response.setSubjectResponses(
+            new ArrayList<>(teacher.getSubjects()).stream()
+                .map(this::mapToSubjectResponse)
                 .collect(Collectors.toList())
         );
 
         return response;
     }
+
 
     
     private AddressResponse mapToAddressResponse(Address address) {
@@ -201,7 +219,7 @@ public class TeacherServiceImpl implements TeacherService {
         response.setCity(address.getCity());
         response.setState(address.getState());
         response.setCountry(address.getCountry());
-        response.setPostalCode(address.getPostalCode());
+        response.setZipCode(address.getPostalCode());
         return response;
     }
     
@@ -226,4 +244,14 @@ public class TeacherServiceImpl implements TeacherService {
         res.setGrade(education.getGrade());
         return res;
     }
+    
+    private SubjectResponse mapToSubjectResponse(Subjects subject) {
+        SubjectResponse response = new SubjectResponse();
+        response.setSubjectId(subject.getSubId());
+        response.setSubjectName(subject.getSubName());
+        response.setSubjectCredits(subject.getSubCredits());
+        response.setSubjectCode(subject.getSubCode());
+        return response;
+    }
+
 }

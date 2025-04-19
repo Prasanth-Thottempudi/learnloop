@@ -31,4 +31,7 @@ public class TeacherRegistrationRequest {
 
     @Valid
     private List<EducationRequest> educations;
+    
+////    @NotEmpty(message = "At least one subject must be assigned")
+    private List<Integer> subjectIds;
 }

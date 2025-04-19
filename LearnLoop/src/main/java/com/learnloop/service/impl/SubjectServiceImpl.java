@@ -35,6 +35,8 @@ public class SubjectServiceImpl implements SubjectService {
     public SubjectResponse getSubjectById(Integer id) {
         Subjects subject = subjectsRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
+//        System.out.println(subject.getTeachers());
+//        System.out.println(subject.getStudents());
         return mapToResponse(subject);
     }
 

@@ -13,4 +13,6 @@ public class TeacherResponse {
     private AddressResponse address;
     private List<ExperienceResponse> experiences;
     private List<EducationResponse> educations;
+    
+    private List<SubjectResponse> subjectResponses;
 }

@@ -4,6 +4,9 @@ package com.learnloop.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,5 +51,10 @@ public class Subjects {
     private String subCode;
 
     @ManyToMany(mappedBy = "subjects")
+    @JsonManagedReference
     private Set<Students> students = new HashSet<>();
+    
+    @ManyToMany(mappedBy = "subjects")
+    @JsonManagedReference
+    private Set<Teacher> teachers = new HashSet<>();
 }

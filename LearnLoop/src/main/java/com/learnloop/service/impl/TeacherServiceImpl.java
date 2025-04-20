@@ -100,6 +100,13 @@ public class TeacherServiceImpl implements TeacherService {
             existing.getEducations().addAll(educationList);
         }
 
+//        if (request.getSubjectIds() != null && !request.getSubjectIds().isEmpty()) {
+//	        List<Subjects> subjects = subjectsRepository.findAllById(request.getSubjectIds());
+//	        existing.setSubjects(subjects);
+//	    }
+        List<Subjects> allById = subjectsRepository.findAllById(request.getSubjectIds());
+        existing.setSubjects(allById);
+
         Teacher updated = teacherRepository.save(existing);
         return mapToResponse(updated);
     }
@@ -110,6 +117,7 @@ public class TeacherServiceImpl implements TeacherService {
         Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found with ID: " + id));
 
+        System.out.println(teacher);
         teacherRepository.delete(teacher);
 
         // Create a response object with the necessary details

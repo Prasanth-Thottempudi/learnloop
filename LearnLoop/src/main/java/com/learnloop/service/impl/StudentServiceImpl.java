@@ -130,7 +130,19 @@ public class StudentServiceImpl implements StudentService {
         res.setState(student.getAddress().getState());
         res.setPostalCode(student.getAddress().getPostalCode());
         res.setCountry(student.getAddress().getCountry());
+        
         res.setCity(student.getAddress().getCity());
+        List<SubjectResponse> subjectResponses = student.getSubjects().stream().map(subject -> {
+            SubjectResponse s = new SubjectResponse();
+            s.setSubjectId(subject.getSubId());
+            s.setSubjectName(subject.getSubName());
+            s.setSubjectCode(subject.getSubCode());
+            s.setSubjectCredits(subject.getSubCredits());
+            return s;
+        }).toList();
+
+        res.setSubjects(subjectResponses);
+        
         return res;
     }
 
@@ -211,6 +223,13 @@ public class StudentServiceImpl implements StudentService {
 	    address.setPostalCode(request.getPostalCode());
 	    address.setCountry(request.getCountry());
 	    existingStudent.setAddress(address);
+	    
+	 // Update subjects
+	    if (request.getSubjectIds() != null && !request.getSubjectIds().isEmpty()) {
+	        List<Subjects> subjects = subjectsRepository.findAllById(request.getSubjectIds());
+	        existingStudent.setSubjects(subjects);
+	    }
+
 
 	    Students updatedStudent = studentRepository.save(existingStudent);
 
@@ -229,6 +248,17 @@ public class StudentServiceImpl implements StudentService {
 	        response.setPostalCode(updatedStudent.getAddress().getPostalCode());
 	        response.setCountry(updatedStudent.getAddress().getCountry());
 	    }
+	    
+	    List<SubjectResponse> subjectResponses = updatedStudent.getSubjects().stream().map(subject -> {
+            SubjectResponse s = new SubjectResponse();
+            s.setSubjectId(subject.getSubId());
+            s.setSubjectName(subject.getSubName());
+            s.setSubjectCode(subject.getSubCode());
+            s.setSubjectCredits(subject.getSubCredits());
+            return s;
+        }).toList();
+
+        response.setSubjects(subjectResponses);
 
 	    return response;
 	}

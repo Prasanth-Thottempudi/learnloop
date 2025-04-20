@@ -1,9 +1,7 @@
 package com.learnloop.entity;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -22,10 +20,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "teacher_data")
 @Data
+@ToString(onlyExplicitlyIncluded = true)
 public class Teacher {
 
     @Id

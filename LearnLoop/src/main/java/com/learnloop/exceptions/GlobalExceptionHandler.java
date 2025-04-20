@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,6 +24,23 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(DuplicateStudentException.class)
 	public ResponseEntity<String> handleDuplicateStudentException(DuplicateStudentException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+	    String rootMessage = ex.getRootCause() != null ? ex.getRootCause().getMessage() : ex.getMessage();
+
+	    if (rootMessage != null && rootMessage.contains("Cannot delete or update a parent row")) {
+	        if (rootMessage.contains("student_subjects")) {
+	            return new ResponseEntity<>("This subject is already assigned to one or more students and cannot be deleted.", HttpStatus.CONFLICT);
+	        } else if (rootMessage.contains("teacher_subjects")) {
+	            return new ResponseEntity<>("This subject is already assigned to one or more teachers and cannot be deleted.", HttpStatus.CONFLICT);
+	        } else {
+	            return new ResponseEntity<>("This subject is already assigned and cannot be deleted due to related records.", HttpStatus.CONFLICT);
+	        }
+	    }
+
+	    return new ResponseEntity<>("Data integrity violation: " + rootMessage, HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
